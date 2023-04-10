@@ -1,60 +1,25 @@
-# IMDB-LLM: Movie Query Made Simple
+# Langchain2Neo4j
 
-![IMDB-LLM Demo](./image/llm-imdb.gif)
+![LangchainNeo4j Demo](./image/langchain2neo4j.png)
 
-Welcome to IMDB-LLM, a proof of concept app that demonstrates the power of [LangChain](https://github.com/hwchase17/langchain) and LLMs in extracting information from graphs! In just 10 hours it is possible to develop a user-friendly application that enables users to search for movie titles in the IMDB dataset graph or discover similar movies using natural language queries. The best part? If the LLM lacks specific information, it will first search on Google, then query the title in the database.
+The Langchain2Neo4j is a proof of concept application of how to integrate Neo4j into the Langchain ecosystem.
+This project took heavy inspiration from [IMDB-LLM](https://github.com/ibiscp/LLM-IMDB).
+The IMDB-LLM integrated graph search using networkx library into langchain ecosystem.
+I borrowed the idea and changed the project to use Neo4j as the source of information for the LLM.
 
-## Overview
+## Neo4j database
 
-IMDB-LLM's Graph Explorer is built using [LangChain](https://github.com/hwchase17/langchain) and LLMs, state-of-the-art technologies in natural language processing and machine learning. The application employs a graph representation of the IMDB dataset, encompassing data on movies, actors, directors, and more. Users can input queries in natural language, such as "Give me some drama movie options with Leonardo DiCaprio" or "Show me movies directed by Christopher Nolan", and the LLM will retrieve the pertinent information from the graph.
-
-Should the LLM be unable to provide an answer, it will utilize the Google Search API to find supplementary information, which it will then use to refine the search.
-
-## Features
-
-- Search for movie titles within the graph
-- Discover similar movies using natural language queries
-- Automatic Google search for missing information
+The project uses the [Recommendation project](https://sandbox.neo4j.com/?usecase=recommendations) that is available as part of the Neo4j Sandbox.
+If you want a local instance of Neo4j, you can restore a database dump that is available [here](https://github.com/neo4j-graph-examples/recommendations/tree/main/data).
 
 ## Installation and Setup
 
-1. Clone the repository:
+1. Fill-in the environment variables as shown in the `env.example`
+
+2. Run the project using docker-compose
 
 ```bash
-git clone https://github.com/ibiscp/LLM-IMDB.git
-
-```
-
-2. Navigate to the frontend directory and install the required dependencies
-
-```bash
-cd frontend
-npm install
-```
-
-3. Install the necessary dependencies for the backend
-
-```bash
-poetry install
-```
-
-4. Launch the frontend
-
-```bash
-npm run start
-```
-
-5. Set up the environment variables
-
-```bash
-export OPENAI_API_KEY=<your-openai-api-key>
-export SERPAPI_API_KEY=<your-serpapi-api-key>
-```
-
-6. Start the backend
-
-```bash
-python3 backend/main.py
+docker-compose up
 ```
 
 7. Open the application in your browser at http://localhost:3000

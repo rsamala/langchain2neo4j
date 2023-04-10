@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  frontend:
+    build:
+      context: frontend/.
+    hostname: frontend
+    restart: always
+    container_name: frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    links:
+      - backend
+  backend:
+    build:
+      context: backend/.
+    hostname: backend
+    restart: always
+    container_name: backend
+    ports:
+      - 7860:7860
+    env_file:
+      - .env
+    
