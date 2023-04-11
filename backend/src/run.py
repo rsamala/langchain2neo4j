@@ -28,7 +28,6 @@ def get_result_and_thought_using_graph(
         with io.StringIO() as output_buffer, contextlib.redirect_stdout(output_buffer):
             try:
                 output = langchain_object(chat_input)
-                print(output)
             except ValueError as exc:
                 # make the error message more informative
                 logger.debug(f"Error: {str(exc)}")

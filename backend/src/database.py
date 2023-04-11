@@ -21,7 +21,7 @@ class Neo4jDatabase:
     ) -> List[Dict[str, str]]:
         logger.critical(cypher_query)
         with self.driver.session() as session:
-            result = session.run(cypher_query)
+            result = session.run(cypher_query, params)
             return [r.values()[0] for r in result]
 
 
