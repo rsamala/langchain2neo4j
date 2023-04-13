@@ -24,9 +24,6 @@ RETURN {{movie: movie.title, role: r.role}} AS result
 MATCH (m:Movie)
 WHERE toLower(m.title) CONTAINS toLower("matrix")
 RETURN {{movie:m.title}} AS result
-# Which movies do I like?
-MATCH (u:User {{id: $userId}})-[:LIKE_MOVIE]->(m:Movie)
-RETURN {{movie:m.title}} AS result
 """
 
 

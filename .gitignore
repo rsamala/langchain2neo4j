@@ -236,3 +236,5 @@ dmypy.json
 
 # Poetry
 .testenv/*
+
+movie_embeddings.csv
