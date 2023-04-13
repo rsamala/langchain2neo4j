@@ -22,9 +22,7 @@ def get_result_and_thought_using_graph(
         for key in langchain_object.input_keys:
             if key not in [memory_key, "chat_history"]:
                 chat_input = {key: message}
-
-        langchain_object.return_intermediate_steps = True
-
+        logger.critical(langchain_object.memory)
         with io.StringIO() as output_buffer, contextlib.redirect_stdout(output_buffer):
             try:
                 output = langchain_object(chat_input)

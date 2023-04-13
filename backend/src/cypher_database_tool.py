@@ -1,13 +1,16 @@
-from typing import Dict, List, Any
-
-from langchain.chains.base import Chain
-from langchain.chains.llm import LLMChain
-from langchain.llms.base import BaseLLM
-from langchain.prompts.base import BasePromptTemplate
-from langchain.prompts.prompt import PromptTemplate
-from pydantic import BaseModel, Extra
-
 from database import Neo4jDatabase
+from pydantic import BaseModel, Extra
+from langchain.prompts.prompt import PromptTemplate
+from langchain.prompts.base import BasePromptTemplate
+from langchain.llms.base import BaseLLM
+from langchain.chains.llm import LLMChain
+from langchain.chains.base import Chain
+from typing import Dict, List, Any
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 examples = """
 # Who played in Top Gun?
@@ -116,7 +119,6 @@ class LLMCypherGraphChain(Chain, BaseModel):
             inputs[self.input_key], verbose=self.verbose)
         t = cypher_executor.predict(
             question=inputs[self.input_key], stop=["Output:"])
-        print(t)
         data = self._fetch_neo4j_result(t)
         text_executor = LLMChain(
             prompt=self.text_prompt, llm=self.llm, callback_manager=self.callback_manager
