@@ -6,11 +6,9 @@ from langchain.llms.base import BaseLLM
 from langchain.chains.llm import LLMChain
 from langchain.chains.base import Chain
 from typing import Dict, List, Any
+
 import logging
-
-
 logger = logging.getLogger(__name__)
-
 
 examples = """
 # Who played in Top Gun?
@@ -62,12 +60,19 @@ TEXT_PROMPT = PromptTemplate(
     input_variables=["question", "information"], template=TEXT_TEMPLATE)
 
 
+def clean_answer(text):
+    response = text
+    # If the model apologized, remove the first line or sentence
+    if "apologi" in response:
+        if "\n" in response:
+            response = " ".join(response.split("\n")[1:])
+        else:
+            response = " ".join(response.split(".")[1:])
+    return response
+
+
 class LLMCypherGraphChain(Chain, BaseModel):
     """Chain that interprets a prompt and executes python code to do math.
-    Example:
-        .. code-block:: python
-            from langchain import LLMMathChain, OpenAI
-            llm_math = LLMMathChain(llm=OpenAI())
     """
 
     llm: Any
@@ -112,6 +117,7 @@ class LLMCypherGraphChain(Chain, BaseModel):
         return {self.output_key: output}
 
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
+        logger.critical(f"Cypher generator inputs: {inputs}")
         cypher_executor = LLMChain(
             prompt=self.cypher_prompt, llm=self.llm, callback_manager=self.callback_manager
         )
@@ -125,7 +131,7 @@ class LLMCypherGraphChain(Chain, BaseModel):
         )
         answer = text_executor.predict(
             question=inputs[self.input_key], information=data)
-        return {'answer': answer}
+        return {'answer': clean_answer(answer)}
 
     @property
     def _chain_type(self) -> str:

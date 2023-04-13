@@ -1,16 +1,17 @@
 from __future__ import annotations
+from database import Neo4jDatabase
+from langchain.prompts.base import BasePromptTemplate
+from langchain.llms.base import BaseLLM
+from langchain.chains.llm import LLMChain
+from langchain.chains.graph_qa.prompts import ENTITY_EXTRACTION_PROMPT, PROMPT
+from langchain.chains.base import Chain
 
 from typing import Any, Dict, List
 
 from pydantic import Field
+import logging
+logger = logging.getLogger(__name__)
 
-from langchain.chains.base import Chain
-from langchain.chains.graph_qa.prompts import ENTITY_EXTRACTION_PROMPT, PROMPT
-from langchain.chains.llm import LLMChain
-from langchain.llms.base import BaseLLM
-from langchain.prompts.base import BasePromptTemplate
-
-from database import Neo4jDatabase
 
 fulltext_search = """
 CALL db.index.fulltext.queryNodes("movie", $query) 
@@ -80,23 +81,16 @@ class LLMFulltextGraphChain(Chain):
     def _call(self, inputs: Dict[str, str]) -> Dict[str, Any]:
         """Extract entities, look up info and answer question."""
         question = inputs[self.input_key]
-
-        entity_string = self.entity_extraction_chain.run(question)
-
-        self.callback_manager.on_text(
-            "Entities Extracted:", end="\n", verbose=self.verbose
-        )
-        self.callback_manager.on_text(
-            entity_string, color="green", end="\n", verbose=self.verbose
-        )
+        params = generate_params(question)
         self.callback_manager.on_text(
             "Query parameters:", end="\n", verbose=self.verbose
         )
         self.callback_manager.on_text(
-            generate_params(entity_string), color="green", end="\n", verbose=self.verbose
+            params, color="green", end="\n", verbose=self.verbose
         )
+        logger.critical(f"Fulltext params: {params}")
         context = self.graph.query(
-            fulltext_search, {'query': generate_params(entity_string)})
+            fulltext_search, {'query': params})
         self.callback_manager.on_text(
             "Full Context:", end="\n", verbose=self.verbose)
         self.callback_manager.on_text(

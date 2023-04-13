@@ -22,7 +22,8 @@ class Neo4jDatabase:
         logger.critical(cypher_query)
         with self.driver.session() as session:
             result = session.run(cypher_query, params)
-            return [r.values()[0] for r in result]
+            # Limit to at most 10 results
+            return [r.values()[0] for r in result][:10]
 
 
 if __name__ == "__main__":

@@ -34,16 +34,15 @@ class MovieAgent(AgentExecutor):
                 func=cypher_tool.run,
                 description="""
                 Utilize this tool to search within a movie database, specifically designed to answer movie-related questions. 
-                The tool accepts inputs such as clear title, genre, director, actor, or year, ensuring accurate and targeted results. 
-                Ideal for inquiries that require information from one or more of the following categories: title, genre, director, actor, or year. 
                 This specialized tool offers streamlined search capabilities to help you find the movie information you need with ease.
                 Input should be full question.""",
             ),
             Tool(
                 name="Full text",
                 func=fulltext_tool.run,
-                description="Utilize this tool to when the movies chain does not provide any context.",
+                description="Utilize this when you can't find information about movies from other tools.Input should be a list of relevant movies.",
             ),
+
         ]
 
         agent_chain = initialize_agent(
