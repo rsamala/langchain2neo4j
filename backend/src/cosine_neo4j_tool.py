@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-fulltext_search = """
+vector_search = """
 WITH $embedding AS e
 MATCH (m:Movie)
 WHERE m.embedding IS NOT NULL AND size(m.embedding) = 1536
@@ -72,7 +72,7 @@ class LLMNeo4jVectorChain(Chain):
     def _call(self, inputs: Dict[str, str]) -> Dict[str, Any]:
         """Embed a question and do semantich search."""
         question = inputs[self.input_key]
-        logger.critical(question)
+        logger.info(question)
         embedding = self.embeddings.embed_query(question)
         self.callback_manager.on_text(
             "Query parameters:", end="\n", verbose=self.verbose
@@ -81,7 +81,7 @@ class LLMNeo4jVectorChain(Chain):
             embedding[:5], color="green", end="\n", verbose=self.verbose
         )
         context = self.graph.query(
-            fulltext_search, {'embedding': embedding})
+            vector_search, {'embedding': embedding})
         self.callback_manager.on_text(
             "Full Context:", end="\n", verbose=self.verbose)
         self.callback_manager.on_text(

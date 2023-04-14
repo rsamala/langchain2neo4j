@@ -19,7 +19,7 @@ class Neo4jDatabase:
         cypher_query: str,
         params: Optional[Dict] = {}
     ) -> List[Dict[str, str]]:
-        logger.critical(cypher_query)
+        logger.info(cypher_query)
         with self.driver.session() as session:
             result = session.run(cypher_query, params)
             # Limit to at most 10 results
