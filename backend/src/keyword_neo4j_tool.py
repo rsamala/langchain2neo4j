@@ -39,8 +39,8 @@ def generate_params(input_str):
     return transformed_str
 
 
-class LLMFulltextGraphChain(Chain):
-    """Chain for question-answering against a graph."""
+class LLMKeywordGraphChain(Chain):
+    """Chain for keyword question-answering against a graph."""
 
     graph: Neo4jDatabase = Field(exclude=True)
     qa_chain: LLMChain
@@ -84,7 +84,7 @@ class LLMFulltextGraphChain(Chain):
         self.callback_manager.on_text(
             params, color="green", end="\n", verbose=self.verbose
         )
-        logger.info(f"Fulltext params: {params}")
+        logger.info(f"Keyword search params: {params}")
         context = self.graph.query(
             fulltext_search, {'query': params})
         self.callback_manager.on_text(
@@ -92,6 +92,7 @@ class LLMFulltextGraphChain(Chain):
         self.callback_manager.on_text(
             context, color="green", end="\n", verbose=self.verbose
         )
+        logger.info(f"Keyword search context: {context}")
         result = self.qa_chain({"question": question, "context": context})
         return {self.output_key: result[self.qa_chain.output_key]}
 

@@ -71,7 +71,7 @@ class LLMNeo4jVectorChain(Chain):
     def _call(self, inputs: Dict[str, str]) -> Dict[str, Any]:
         """Embed a question and do semantich search."""
         question = inputs[self.input_key]
-        logger.info(question)
+        logger.info(f"Vector search input: {question}")
         embedding = self.embeddings.embed_query(question)
         self.callback_manager.on_text(
             "Query parameters:", end="\n", verbose=self.verbose
@@ -86,7 +86,7 @@ class LLMNeo4jVectorChain(Chain):
         self.callback_manager.on_text(
             context, color="green", end="\n", verbose=self.verbose
         )
-        logger.info(context)
+        logger.info(f"Vector search context: {context}")
         result = self.qa_chain({"question": question, "context": context})
         return {self.output_key: result[self.qa_chain.output_key]}
 

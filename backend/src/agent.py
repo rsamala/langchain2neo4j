@@ -7,8 +7,8 @@ from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
 from cypher_database_tool import LLMCypherGraphChain
-from fulltext_neo4j_tool import LLMFulltextGraphChain
-from cosine_neo4j_tool import LLMNeo4jVectorChain
+from keyword_neo4j_tool import LLMKeywordGraphChain
+from vector_neo4j_tool import LLMNeo4jVectorChain
 
 
 class MovieAgent(AgentExecutor):
@@ -30,7 +30,7 @@ class MovieAgent(AgentExecutor):
 
         cypher_tool = LLMCypherGraphChain(
             llm=llm, graph=movie_graph, verbose=True)
-        fulltext_tool = LLMFulltextGraphChain.from_llm(
+        fulltext_tool = LLMKeywordGraphChain.from_llm(
             llm=llm, verbose=True, graph=movie_graph)
         vector_tool = LLMNeo4jVectorChain.from_llm(
             llm=llm, verbose=True, graph=movie_graph
@@ -39,7 +39,7 @@ class MovieAgent(AgentExecutor):
         # Load the tool configs that are needed.
         tools = [
             Tool(
-                name="Cypher",
+                name="Cypher search",
                 func=cypher_tool.run,
                 description="""
                 Utilize this tool to search within a movie database, specifically designed to answer movie-related questions.
@@ -47,14 +47,14 @@ class MovieAgent(AgentExecutor):
                 Input should be full question.""",
             ),
             Tool(
-                name="Full text",
+                name="Keyword search",
                 func=fulltext_tool.run,
-                description="Utilize this when you can't find information about movies from other tools.Input should be a list of relevant movies.",
+                description="Utilize this tool when explicitly told to use keyword search.Input should be a list of relevant movies inferred from the question.",
             ),
             Tool(
                 name="Vector search",
                 func=vector_tool.run,
-                description="Utilize this when you can't find information about movies from other tools.Input should be full question.",
+                description="Utilize this tool when explicity told to use vector search.Input should be full question.Do not include agent instructions.",
             ),
 
         ]

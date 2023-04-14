@@ -24,6 +24,10 @@ RETURN {{movie: movie.title, role: r.role}} AS result
 MATCH (m:Movie)
 WHERE toLower(m.title) CONTAINS toLower("matrix")
 RETURN {{movie:m.title}} AS result
+# Give me a list of five good comedies
+MATCH (m:Movie)-[:IN_GENRE]->(:Genre {{name:"Comedy"}})
+RETURN {{movie:m.title}} AS result
+ORDER BY m.imdbRating DESC LIMIT 5
 """
 
 
@@ -111,6 +115,7 @@ class LLMCypherGraphChain(Chain, BaseModel):
         self.callback_manager.on_text("\nInformation: ", verbose=self.verbose)
         self.callback_manager.on_text(
             output, color="yellow", verbose=self.verbose)
+        logger.info(f"Cypher generator context: {output}")
         return {self.output_key: output}
 
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
