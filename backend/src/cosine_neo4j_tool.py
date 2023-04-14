@@ -10,8 +10,7 @@ from langchain.chains.base import Chain
 from typing import Any, Dict, List
 
 from pydantic import Field
-import logging
-logger = logging.getLogger(__name__)
+from logger import logger
 
 
 vector_search = """
@@ -87,7 +86,7 @@ class LLMNeo4jVectorChain(Chain):
         self.callback_manager.on_text(
             context, color="green", end="\n", verbose=self.verbose
         )
-        logger.critical(context)
+        logger.info(context)
         result = self.qa_chain({"question": question, "context": context})
         return {self.output_key: result[self.qa_chain.output_key]}
 

@@ -9,8 +9,7 @@ from langchain.chains.base import Chain
 from typing import Any, Dict, List
 
 from pydantic import Field
-import logging
-logger = logging.getLogger(__name__)
+from logger import logger
 
 
 fulltext_search = """
@@ -85,7 +84,7 @@ class LLMFulltextGraphChain(Chain):
         self.callback_manager.on_text(
             params, color="green", end="\n", verbose=self.verbose
         )
-        logger.critical(f"Fulltext params: {params}")
+        logger.info(f"Fulltext params: {params}")
         context = self.graph.query(
             fulltext_search, {'query': params})
         self.callback_manager.on_text(

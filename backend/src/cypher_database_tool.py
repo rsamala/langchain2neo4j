@@ -7,8 +7,8 @@ from langchain.chains.llm import LLMChain
 from langchain.chains.base import Chain
 from typing import Dict, List, Any
 
-import logging
-logger = logging.getLogger(__name__)
+from logger import logger
+
 
 examples = """
 # Who played in Top Gun?
@@ -114,7 +114,7 @@ class LLMCypherGraphChain(Chain, BaseModel):
         return {self.output_key: output}
 
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
-        logger.critical(f"Cypher generator inputs: {inputs}")
+        logger.info(f"Cypher generator inputs: {inputs}")
         cypher_executor = LLMChain(
             prompt=self.cypher_prompt, llm=self.llm, callback_manager=self.callback_manager
         )

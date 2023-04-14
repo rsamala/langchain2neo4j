@@ -1,9 +1,8 @@
 from typing import List, Optional, Tuple, Dict
-import logging
 
 from neo4j import GraphDatabase
 
-logger = logging.getLogger(__name__)
+from logger import logger
 
 
 class Neo4jDatabase:
@@ -22,8 +21,8 @@ class Neo4jDatabase:
         logger.info(cypher_query)
         with self.driver.session() as session:
             result = session.run(cypher_query, params)
-            # Limit to at most 10 results
-            return [r.values()[0] for r in result][:10]
+            # Limit to at most 50 results
+            return [r.values()[0] for r in result][:50]
 
 
 if __name__ == "__main__":
