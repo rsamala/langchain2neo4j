@@ -104,35 +104,20 @@ class LLMCypherGraphChain(Chain, BaseModel):
         """
         return [self.output_key]
 
-    def _fetch_neo4j_result(self, generated_cypher: str) -> Dict[str, str]:
-        import yaml
-
-        self.callback_manager.on_text("\nQuery:\n", verbose=self.verbose)
-        self.callback_manager.on_text(
-            generated_cypher, color="green", verbose=self.verbose)
-        # Convert t to a dictionary
-        output = self.graph.query(generated_cypher)
-        self.callback_manager.on_text("\nInformation: ", verbose=self.verbose)
-        self.callback_manager.on_text(
-            output, color="yellow", verbose=self.verbose)
-        logger.info(f"Cypher generator context: {output}")
-        return {self.output_key: output}
-
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
         logger.info(f"Cypher generator inputs: {inputs}")
         cypher_executor = LLMChain(
             prompt=self.cypher_prompt, llm=self.llm, callback_manager=self.callback_manager
         )
-        self.callback_manager.on_text(
-            inputs[self.input_key], verbose=self.verbose)
-        t = cypher_executor.predict(
+        cypher_statement = cypher_executor.predict(
             question=inputs[self.input_key], stop=["Output:"])
-        data = self._fetch_neo4j_result(t)
+        context = self.graph.query(cypher_statement)
+        logger.info(f"Cypher generator context: {context}")
         text_executor = LLMChain(
             prompt=self.text_prompt, llm=self.llm, callback_manager=self.callback_manager
         )
         answer = text_executor.predict(
-            question=inputs[self.input_key], information=data)
+            question=inputs[self.input_key], information=context)
         return {'answer': clean_answer(answer)}
 
     @property
@@ -146,7 +131,7 @@ if __name__ == "__main__":
     llm = OpenAI(temperature=0.3)
     database = Neo4jDatabase(host="bolt://100.27.33.83:7687",
                              user="neo4j", password="room-loans-transmissions")
-    chain = LLMGraphChain(llm=llm, verbose=True, graph=database)
+    chain = LLMCypherGraphChain(llm=llm, verbose=True, graph=database)
 
     output = chain.run(
         "Who played in Top Gun?"
