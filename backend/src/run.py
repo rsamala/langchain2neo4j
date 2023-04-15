@@ -31,6 +31,7 @@ def get_result_and_thought_using_graph(
                 logger.debug(f"Error: {str(exc)}")
                 output = langchain_object.run(chat_input)
             thought = output_buffer.getvalue().strip()
+            logger.info(thought)
 
     except Exception as exc:
         raise ValueError(f"Error: {str(exc)}") from exc

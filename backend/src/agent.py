@@ -2,7 +2,7 @@ from langchain.agents.agent import AgentExecutor
 from langchain.agents.tools import Tool
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ConversationBufferMemory, ReadOnlySharedMemory
 from langchain.agents import initialize_agent
 from langchain.agents import AgentType
 
@@ -23,13 +23,14 @@ class MovieAgent(AgentExecutor):
         if model_name in ['gpt-3.5-turbo', 'gpt-4']:
             llm = ChatOpenAI(temperature=0, model_name=model_name)
         else:
-            llm = OpenAI(temperature=0, model_name=model_name)
+            raise Exception(f"Model {model_name} is currently not supported")
 
         memory = ConversationBufferMemory(
             memory_key="chat_history", return_messages=True)
+        readonlymemory = ReadOnlySharedMemory(memory=memory)
 
         cypher_tool = LLMCypherGraphChain(
-            llm=llm, graph=movie_graph, verbose=True)
+            llm=llm, graph=movie_graph, verbose=True, memory=readonlymemory)
         fulltext_tool = LLMKeywordGraphChain.from_llm(
             llm=llm, verbose=True, graph=movie_graph)
         vector_tool = LLMNeo4jVectorChain.from_llm(

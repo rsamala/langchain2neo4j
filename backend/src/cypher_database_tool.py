@@ -1,9 +1,14 @@
 from database import Neo4jDatabase
 from pydantic import BaseModel, Extra
-from langchain.prompts.prompt import PromptTemplate
 from langchain.prompts.base import BasePromptTemplate
 from langchain.chains.llm import LLMChain
 from langchain.chains.base import Chain
+from langchain.memory import ReadOnlySharedMemory
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 from typing import Dict, List, Any
 
 from logger import logger
@@ -30,7 +35,7 @@ ORDER BY m.imdbRating DESC LIMIT 5
 """
 
 
-CYPHER_TEMPLATE = """
+SYSTEM_TEMPLATE = """
 You are an assistant with an ability to generate Cypher queries based off example Cypher queries.
 Example Cypher queries are:\n""" + examples + """\n
 Do not response with any explanation or any other information except the Cypher query.
@@ -38,11 +43,12 @@ You do not ever apologize and strictly generate cypher statements based of the p
 You need to update the database using an appropriate Cypher statement when a user mentions their likes or dislikes, or what they watched already.
 Do not provide any Cypher statements that can't be inferred from Cypher examples.
 Inform the user when you can't infer the cypher statement due to the lack of context of the conversation and state what is the missing context.
-The {question} is
 """
 
-CYPHER_PROMPT = PromptTemplate(
-    input_variables=["question"], template=CYPHER_TEMPLATE)
+SYSTEM_CYPHER_PROMPT = SystemMessagePromptTemplate.from_template(
+    SYSTEM_TEMPLATE)
+HUMAN_TEMPLATE = "{question}"
+HUMAN_PROMPT = HumanMessagePromptTemplate.from_template(HUMAN_TEMPLATE)
 
 
 class LLMCypherGraphChain(Chain, BaseModel):
@@ -51,10 +57,12 @@ class LLMCypherGraphChain(Chain, BaseModel):
 
     llm: Any
     """LLM wrapper to use."""
-    cypher_prompt: BasePromptTemplate = CYPHER_PROMPT
+    system_prompt: BasePromptTemplate = SYSTEM_CYPHER_PROMPT
+    human_prompt: BasePromptTemplate = HUMAN_PROMPT
     input_key: str = "question"  #: :meta private:
     output_key: str = "answer"  #: :meta private:
     graph: Neo4jDatabase
+    memory: ReadOnlySharedMemory
 
     class Config:
         """Configuration for this pydantic object."""
@@ -77,17 +85,25 @@ class LLMCypherGraphChain(Chain, BaseModel):
         return [self.output_key]
 
     def _call(self, inputs: Dict[str, str]) -> Dict[str, str]:
-        logger.info(f"Cypher generator inputs: {inputs}")
+        logger.debug(f"Cypher generator inputs: {inputs}")
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [self.system_prompt] + inputs['chat_history'] + [self.human_prompt])
         cypher_executor = LLMChain(
-            prompt=self.cypher_prompt, llm=self.llm, callback_manager=self.callback_manager
+            prompt=chat_prompt, llm=self.llm, callback_manager=self.callback_manager
         )
         cypher_statement = cypher_executor.predict(
             question=inputs[self.input_key], stop=["Output:"])
+        self.callback_manager.on_text(
+            "Generated Cypher statement:", color="green", end="\n", verbose=self.verbose
+        )
+        self.callback_manager.on_text(
+            cypher_statement, color="blue", end="\n", verbose=self.verbose
+        )
         # If Cypher statement was not generated due to lack of context
         if not "MATCH" in cypher_statement:
             return {'answer': 'Missing context to create a Cypher statement'}
         context = self.graph.query(cypher_statement)
-        logger.info(f"Cypher generator context: {context}")
+        logger.debug(f"Cypher generator context: {context}")
 
         return {'answer': context}
 
@@ -97,11 +113,12 @@ class LLMCypherGraphChain(Chain, BaseModel):
 
 
 if __name__ == "__main__":
-    from langchain.llms import OpenAI
+    from langchain.chat_models import ChatOpenAI
 
-    llm = OpenAI(temperature=0.3)
-    database = Neo4jDatabase(host="bolt://100.27.33.83:7687",
-                             user="neo4j", password="room-loans-transmissions")
+    llm = ChatOpenAI(
+        temperature=0.3)
+    database = Neo4jDatabase(host="bolt://3.83.107.240:7687",
+                             user="neo4j", password="promotion-impulse-supervisor")
     chain = LLMCypherGraphChain(llm=llm, verbose=True, graph=database)
 
     output = chain.run(
