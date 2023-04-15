@@ -2,7 +2,6 @@ from database import Neo4jDatabase
 from pydantic import BaseModel, Extra
 from langchain.prompts.prompt import PromptTemplate
 from langchain.prompts.base import BasePromptTemplate
-from langchain.llms.base import BaseLLM
 from langchain.chains.llm import LLMChain
 from langchain.chains.base import Chain
 from typing import Dict, List, Any
@@ -45,32 +44,6 @@ The {question} is
 CYPHER_PROMPT = PromptTemplate(
     input_variables=["question"], template=CYPHER_TEMPLATE)
 
-TEXT_TEMPLATE = """
-You are an assistant that helps to generate text to form nice and human understandable answers based.
-The latest prompt contains the information, and you need to generate a human readable response based on the given information.
-Make it sound like the information are coming from an AI assistant, but don't add any information.
-Do not add any additional information that is not explicitly provided in the latest prompt.
-I repeat, do not add any information that is not explicitly given.
-The question was 
-{question}
-and the information used to provide the answer is
-{information}
-"""
-
-TEXT_PROMPT = PromptTemplate(
-    input_variables=["question", "information"], template=TEXT_TEMPLATE)
-
-
-def clean_answer(text):
-    response = text
-    # If the model apologized, remove the first line or sentence
-    if "apologi" in response:
-        if "\n" in response:
-            response = " ".join(response.split("\n")[1:])
-        else:
-            response = " ".join(response.split(".")[1:])
-    return response
-
 
 class LLMCypherGraphChain(Chain, BaseModel):
     """Chain that interprets a prompt and executes python code to do math.
@@ -79,7 +52,6 @@ class LLMCypherGraphChain(Chain, BaseModel):
     llm: Any
     """LLM wrapper to use."""
     cypher_prompt: BasePromptTemplate = CYPHER_PROMPT
-    text_prompt: BasePromptTemplate = TEXT_PROMPT
     input_key: str = "question"  #: :meta private:
     output_key: str = "answer"  #: :meta private:
     graph: Neo4jDatabase
@@ -111,14 +83,13 @@ class LLMCypherGraphChain(Chain, BaseModel):
         )
         cypher_statement = cypher_executor.predict(
             question=inputs[self.input_key], stop=["Output:"])
+        # If Cypher statement was not generated due to lack of context
+        if not "MATCH" in cypher_statement:
+            return {'answer': 'Missing context to create a Cypher statement'}
         context = self.graph.query(cypher_statement)
         logger.info(f"Cypher generator context: {context}")
-        text_executor = LLMChain(
-            prompt=self.text_prompt, llm=self.llm, callback_manager=self.callback_manager
-        )
-        answer = text_executor.predict(
-            question=inputs[self.input_key], information=context)
-        return {'answer': clean_answer(answer)}
+
+        return {'answer': context}
 
     @property
     def _chain_type(self) -> str:
