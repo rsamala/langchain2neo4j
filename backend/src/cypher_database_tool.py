@@ -107,10 +107,6 @@ class LLMCypherGraphChain(Chain, BaseModel):
 
         return {'answer': context}
 
-    @property
-    def _chain_type(self) -> str:
-        return "neo4j_llm"
-
 
 if __name__ == "__main__":
     from langchain.chat_models import ChatOpenAI

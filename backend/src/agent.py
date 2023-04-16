@@ -31,9 +31,9 @@ class MovieAgent(AgentExecutor):
 
         cypher_tool = LLMCypherGraphChain(
             llm=llm, graph=movie_graph, verbose=True, memory=readonlymemory)
-        fulltext_tool = LLMKeywordGraphChain.from_llm(
-            llm=llm, verbose=True, graph=movie_graph)
-        vector_tool = LLMNeo4jVectorChain.from_llm(
+        fulltext_tool = LLMKeywordGraphChain(
+            llm=llm, graph=movie_graph, verbose=True)
+        vector_tool = LLMNeo4jVectorChain(
             llm=llm, verbose=True, graph=movie_graph
         )
 
@@ -50,7 +50,9 @@ class MovieAgent(AgentExecutor):
             Tool(
                 name="Keyword search",
                 func=fulltext_tool.run,
-                description="Utilize this tool when explicitly told to use keyword search.Input should be a list of relevant movies inferred from the question.",
+                description="""Utilize this tool when explicitly told to use keyword search.
+                Input should be a list of relevant movies inferred from the question.
+                Remove stop word "The" from specified movie titles.""",
             ),
             Tool(
                 name="Vector search",
