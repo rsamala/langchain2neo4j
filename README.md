@@ -28,6 +28,8 @@ If you want a local instance of Neo4j, you can restore a database dump that is a
 sh seed_db.sh
 ```
 
+If you are using Windows, you can also execute the code in `data/database_seed.ipynb` notebook to seed the database.
+
 3. Run the project using docker-compose
 
 ```bash

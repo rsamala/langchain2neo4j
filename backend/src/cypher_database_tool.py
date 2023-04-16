@@ -40,7 +40,6 @@ You are an assistant with an ability to generate Cypher queries based off exampl
 Example Cypher queries are:\n""" + examples + """\n
 Do not response with any explanation or any other information except the Cypher query.
 You do not ever apologize and strictly generate cypher statements based of the provided Cypher examples.
-You need to update the database using an appropriate Cypher statement when a user mentions their likes or dislikes, or what they watched already.
 Do not provide any Cypher statements that can't be inferred from Cypher examples.
 Inform the user when you can't infer the cypher statement due to the lack of context of the conversation and state what is the missing context.
 """
