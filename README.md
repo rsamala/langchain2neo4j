@@ -13,6 +13,8 @@ The project now supports three modes of context search:
 * Full-text search of relevant entities
 * Vector similarity search
 
+Learn more: https://towardsdatascience.com/integrating-neo4j-into-the-langchain-ecosystem-df0e988344d2
+
 ## Neo4j database
 
 The project uses the [Recommendation project](https://sandbox.neo4j.com/?usecase=recommendations) that is available as part of the Neo4j Sandbox.
