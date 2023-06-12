@@ -1,5 +1,7 @@
 # Langchain2Neo4j
 
+_Cypher search is now part of the official LangChain library: https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5 _
+
 ![LangchainNeo4j Demo](./image/langchain2neo4j.png)
 
 The Langchain2Neo4j is a proof of concept application of how to integrate Neo4j into the Langchain ecosystem.
