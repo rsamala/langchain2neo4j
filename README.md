@@ -1,6 +1,6 @@
 # Langchain2Neo4j
 
-_Cypher search is now part of the official LangChain library: https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5 _
+_Cypher search is now part of the official LangChain library, learn more in: https://towardsdatascience.com/langchain-has-added-cypher-search-cb9d821120d5_
 
 ![LangchainNeo4j Demo](./image/langchain2neo4j.png)
 
